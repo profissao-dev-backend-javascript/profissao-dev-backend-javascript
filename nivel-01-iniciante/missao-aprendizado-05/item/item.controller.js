@@ -1,5 +1,3 @@
-const { ObjectId } = require("mongodb")
-
 const service = require("./item.service")
 
 async function readAll(req, res) {
@@ -18,6 +16,13 @@ async function readById(req, res) {
 
   // Buscamos o documento via service
   const item = await service.readById(id)
+
+  // Validar se o item foi encontrado
+  if (!item) {
+    return res.status(404).send({
+      message: "Item not found"
+    })
+  }
 
   // Exibimos o item obtido
   res.send(item)
@@ -58,10 +63,17 @@ async function updateById(req, res) {
   }
 
   // Atualizar o documento via service
-  await service.updateById(id, newItem)
+  const itemUpdated = await service.updateById(id, newItem)
+
+  // Validar se o item foi atualizado
+  if (!itemUpdated) {
+    return res.status(404).send({
+      message: "Item not found"
+    })
+  }
 
   // Exibimos o item atualizado
-  res.send(newItem)
+  res.send(itemUpdated)
 }
 
 async function deleteById(req, res) {
@@ -69,10 +81,16 @@ async function deleteById(req, res) {
   const id = req.params.id
 
   // Removemos o documento no MongoDB a partir do ID
-  await service.deleteById(id)
+  const isDeleted = await service.deleteById(id)
 
-  // Retornamos o status 204 (No Content) indicando
-  // que deu certo
+  // Validar se o item foi removido
+  if (!isDeleted) {
+    return res.status(404).send({
+      message: "Item not found"
+    })
+  }
+
+  // Retornamos o status 204 (No Content) indicando que deu certo
   res.status(204).send()
 }
 

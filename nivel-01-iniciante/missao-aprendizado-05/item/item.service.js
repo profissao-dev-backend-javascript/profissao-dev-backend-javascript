@@ -33,21 +33,35 @@ async function create(item) {
 
 async function updateById(id, newItem) {
   // Atualizar o documento na collection
-  await getCollection().updateOne(
+  const updateResult = await getCollection().updateOne(
     { _id: new ObjectId(id) },
     { $set: newItem }
   )
+  
+  // Caso não tenha atualizado nada, retorna para
+  // encerrar a função
+  if (updateResult.modifiedCount === 0) {
+    return
+  }
 
   // Retornamos o item atualizado
-  return newItem
+  return {
+    _id: id,
+    ...newItem,
+  }
 }
 
-// TODO: Verificar se podemos deixar sem retorno
 async function deleteById(id) {
   // Removemos o documento no MongoDB a partir do ID
-  await getCollection().deleteOne({ _id: new ObjectId(id) })
+  const deleteResult = await getCollection().deleteOne({ _id: new ObjectId(id) })
+  
+  // Caso não tenha removido nada, retorna false
+  if (deleteResult.deletedCount === 0) {
+    return false
+  }
 
-  // TODO: Verificar o retorno da operação deleteOne
+  // Se removeu algo, retorna true
+  return true
 }
 
 module.exports = {
