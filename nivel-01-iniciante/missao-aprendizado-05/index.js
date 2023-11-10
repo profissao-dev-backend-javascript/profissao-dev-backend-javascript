@@ -2,10 +2,12 @@ const express = require('express')
 const { MongoClient, ObjectId } = require('mongodb')
 require('dotenv').config()
 
+// Preparamos as informações do Banco de Dados
 const url = process.env.DATABASE_URL
 const client = new MongoClient(url)
 const dbName = 'db-semana-backend-javascript'
 
+// Declaramos a função main()
 async function main() {
   // Conexão com Banco de Dados
   console.info("Connecting to database...")
@@ -32,24 +34,12 @@ async function main() {
 
   // CRUD de lista de DevMon
 
-  // const items = ["Java", "Kotlin", "Android", "Express", "NestJS"]
-  const items = [
-    {
-      "id": 1,
-      "name": "Java",
-      "imageUrl": "https://salvatore.academy/devmon/1_java.png"
-    },
-    {
-      "id": 2,
-      "name": "Kotlin",
-      "imageUrl": "https://salvatore.academy/devmon/2_kotlin.png"
-    },
-  ]
-
   // READ ALL - [GET] /items
   app.get("/items", async function (req, res) {
+    // Acessamos a lista de documentos na collection do MongoDB
     const documents = await collection.find().toArray()
 
+    // Exibimos esses documentos como JSON
     res.send(documents)
   })
 
@@ -149,11 +139,14 @@ async function main() {
     res.send("Item deleted successfully.")
   })
 
+  // Usamos a porta passada no .env.PORT ou a porta 3000
   const port = process.env.PORT || 3000
 
+  // Subimos o servidor na porta indicada
   app.listen(port, function () {
     console.log(`App running on http://localhost:${port}`)
   })
 }
 
+// Executamos a função main()
 main()
