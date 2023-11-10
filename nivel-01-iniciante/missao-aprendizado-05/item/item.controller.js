@@ -1,13 +1,10 @@
 const { ObjectId } = require("mongodb")
-const { getDatabase } = require("../db/database.helper")
 
-function getCollection() {
-  return getDatabase().collection('items')
-}
+const service = require("./item.service")
 
 async function readAll(req, res) {
-  // Acessamos a lista de documentos na collection do MongoDB
-  const documents = await getCollection().find().toArray()
+  // Acessamos a lista de documentos no Service
+  const documents = await service.readAll()
 
   // Exibimos esses documentos como JSON
   res.send(documents)
@@ -19,10 +16,8 @@ async function readById(req, res) {
   // da lista que começa em 0
   const id = req.params.id
 
-  // Buscamos o documento na collection
-  const item = await getCollection().findOne({
-    _id: new ObjectId(id)
-  })
+  // Buscamos o documento via service
+  const item = await service.readById(id)
 
   // Exibimos o item obtido
   res.send(item)
@@ -40,10 +35,10 @@ async function create(req, res) {
     })
   }
 
-  // Inserir o item na collection
-  await getCollection().insertOne(item)
+  // Inserir o item via service
+  await service.create(item)
 
-  // Enviamos uma mensagem de sucesso
+  // Exibimos o item criado
   res.status(201).send(item)
 }
 
@@ -54,13 +49,18 @@ async function updateById(req, res) {
   // Obtemos o novo item a partir do corpo da requisição
   const newItem = req.body
 
-  // Atualizar o documento na collection
-  await getCollection().updateOne(
-    { _id: new ObjectId(id) },
-    { $set: newItem }
-  )
+  // Validamos o corpo da requisição, garantindo que tem
+  // as propriedades corretas
+  if (!newItem || !newItem.name || !newItem.imageUrl) {
+    return res.status(400).send({
+      message: "name & imageUrl are required."
+    })
+  }
 
-  // Enviamos uma mensagem de sucesso
+  // Atualizar o documento via service
+  await service.updateById(id, newItem)
+
+  // Exibimos o item atualizado
   res.send(newItem)
 }
 
@@ -69,10 +69,11 @@ async function deleteById(req, res) {
   const id = req.params.id
 
   // Removemos o documento no MongoDB a partir do ID
-  await getCollection().deleteOne({ _id: new ObjectId(id) })
+  await service.deleteById(id)
 
-  // Enviamos uma mensagem de sucesso
-  res.send("Item deleted successfully.")
+  // Retornamos o status 204 (No Content) indicando
+  // que deu certo
+  res.status(204).send()
 }
 
 module.exports = {
