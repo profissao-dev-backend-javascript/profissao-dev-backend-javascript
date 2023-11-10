@@ -1,20 +1,15 @@
-const express = require('express')
-const { MongoClient, ObjectId } = require('mongodb')
+// Importa e configura a lib dotenv para adicionar
+// suporte ao arquivo .env na raiz do projeto
 require('dotenv').config()
 
-// Preparamos as informações do Banco de Dados
-const url = process.env.DATABASE_URL
-const client = new MongoClient(url)
-const dbName = 'db-semana-backend-javascript'
+// Importa Express
+const express = require('express')
+const { connectToDatabase } = require('./db/database.helper')
 
 // Declaramos a função main()
 async function main() {
-  // Conexão com Banco de Dados
-  console.info("Connecting to database...")
-  await client.connect()
-  console.info("Database connected successfully!")
-
-  const db = client.db(dbName)
+  // Conexão com o Banco de Dados
+  const db = await connectToDatabase()
   const collection = db.collection('items')
 
   // Inicialização do express
@@ -24,10 +19,12 @@ async function main() {
   // das requisições estará sempre em JSON
   app.use(express.json())
 
+  // Rota Principal
   app.get('/', function (req, res) {
     res.send('Hello World')
   })
 
+  // Rota Secundária
   app.get('/oi', function (req, res) {
     res.send('Olá, mundo!')
   })
